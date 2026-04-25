@@ -1,0 +1,12 @@
+{
+  "name": "learning-companion-gcp",
+  "version": "1.0.0",
+  "description": "Deployment package for Learning Companion on Google Cloud App Engine",
+  "scripts": {
+    "gcp-build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "cd server && npm start"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

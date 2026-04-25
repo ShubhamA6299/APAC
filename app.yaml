@@ -1,0 +1,11 @@
+runtime: nodejs20
+
+env_variables:
+  # The server will run on the default port (usually 8080 in App Engine)
+  # Remember to set your actual GEMINI_API_KEY here or in the console
+  # GEMINI_API_KEY: "your_api_key_here"
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
