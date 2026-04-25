@@ -1,7 +1,15 @@
 import https from 'https';
 import { getUserMemory, updateProgress } from './memory.js';
 
-// [Google Services usage] Using Google Cloud's generative AI (Gemini) via native REST API
+/**
+ * Uses the native HTTPS module to invoke Google Cloud's Gemini 2.5 Flash model via REST API.
+ * This ensures compatibility across all Node versions without relying on the heavy SDK.
+ * 
+ * @param {string} apiKey - The Google Cloud API Key.
+ * @param {string} context - The pedagogical context and prompt instructions.
+ * @param {string} userMessage - The raw message input from the user.
+ * @returns {Promise<string>} The generated AI text response.
+ */
 function generateContentRest(apiKey, context, userMessage) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
@@ -45,6 +53,14 @@ function generateContentRest(apiKey, context, userMessage) {
   });
 }
 
+/**
+ * Main handler for chat messages. Integrates memory state and Google AI generation.
+ * Adjusts teaching pace based on the user's progress.
+ * 
+ * @param {string} sessionId - The user's unique session identifier.
+ * @param {string} message - The message input from the user.
+ * @returns {Promise<Object>} An object containing the AI response and updated progress state.
+ */
 export async function handleChat(sessionId, message) {
   const memory = getUserMemory(sessionId);
   const context = `You are a learning companion. Your goal is to adapt your teaching pace and style.

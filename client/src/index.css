@@ -114,8 +114,25 @@ body {
 }
 
 .chat-header {
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.app-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
 }
 
 .chat-header h1 {

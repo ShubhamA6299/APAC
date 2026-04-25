@@ -15,8 +15,11 @@ function App() {
       <ProgressDashboard progress={progress} />
       <main className="main-content">
         <header className="chat-header">
-          <h1>Learning Companion</h1>
-          <p>Your personalized, AI-powered tutor using Google Cloud Agents.</p>
+          <img src="/logo.png" className="app-logo" alt="Learning Companion Logo" />
+          <div className="header-text">
+            <h1>Learning Companion</h1>
+            <p>Your personalized, AI-powered tutor using Google Cloud Agents.</p>
+          </div>
         </header>
         <ChatInterface setProgress={setProgress} />
       </main>

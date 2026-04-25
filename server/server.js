@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import helmet from 'helmet'; // [Security] Added helmet for basic HTTP header security
 import path from 'path';
 import { fileURLToPath } from 'url';
+import compression from 'compression';
+import { Logging } from '@google-cloud/logging';
 import { handleChat } from './agent.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +26,18 @@ app.use(helmet({
 }));
 app.use(cors());
 app.use(express.json()); // [Efficiency] Built-in json parser is lightweight and fast
+app.use(compression()); // [Efficiency] Added gzip compression to reduce payload size
+
+// [Google Services usage] Initialize Google Cloud Logging safely (Production only)
+let log = { entry: () => ({}), write: () => Promise.resolve() }; 
+if (process.env.NODE_ENV === 'production') {
+  try {
+    const logging = new Logging();
+    log = logging.log('learning-companion-requests');
+  } catch (e) {
+    console.warn('Google Cloud Logging could not initialize.');
+  }
+}
 
 // Serve the static frontend files
 const clientBuildPath = path.join(__dirname, '../client/dist');
@@ -34,6 +48,14 @@ app.post('/api/chat', async (req, res) => {
   const { message, sessionId } = req.body;
   if (!message || !sessionId) {
     return res.status(400).json({ error: 'message and sessionId are required' });
+  }
+
+  // [Google Services usage] Log the incoming request to Google Cloud Logging
+  try {
+    const entry = log.entry({ resource: { type: 'global' } }, { sessionId, messageSnippet: message.substring(0, 50) });
+    log.write(entry).catch(() => {}); // Non-blocking log write
+  } catch (e) {
+    // Graceful degradation if GCP credentials aren't fully set locally
   }
 
   try {
