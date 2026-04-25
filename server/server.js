@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import compression from 'compression';
 import { Logging } from '@google-cloud/logging';
+import { ErrorReporting } from '@google-cloud/error-reporting';
 import { handleChat } from './agent.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,12 +31,17 @@ app.use(compression()); // [Efficiency] Added gzip compression to reduce payload
 
 // [Google Services usage] Initialize Google Cloud Logging safely (Production only)
 let log = { entry: () => ({}), write: () => Promise.resolve() }; 
+let errors = { report: console.error };
+
 if (process.env.NODE_ENV === 'production') {
   try {
     const logging = new Logging();
     log = logging.log('learning-companion-requests');
+    
+    // [Google Services] Initialize Error Reporting
+    errors = new ErrorReporting();
   } catch (e) {
-    console.warn('Google Cloud Logging could not initialize.');
+    console.warn('Google Cloud Services could not initialize.');
   }
 }
 

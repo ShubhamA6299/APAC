@@ -1,5 +1,9 @@
 import https from 'https';
+import NodeCache from 'node-cache';
 import { getUserMemory, updateProgress } from './memory.js';
+
+// [Efficiency] Cache responses for 1 hour to reduce API latency and costs
+const responseCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
 /**
  * Uses the native HTTPS module to invoke Google Cloud's Gemini 2.5 Flash model via REST API.
@@ -68,6 +72,12 @@ User's learning progress: ${JSON.stringify(memory.progress)}
 The user is currently studying: ${memory.currentTopic || 'General topics'}.
 If the user struggles, provide simpler explanations. If they understand, move to advanced topics or give a quiz.`;
 
+  const cacheKey = `${sessionId}:${message}`;
+  const cachedResponse = responseCache.get(cacheKey);
+  if (cachedResponse) {
+    return { ...cachedResponse, cached: true };
+  }
+
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey.trim() === '') {
@@ -80,9 +90,12 @@ If the user struggles, provide simpler explanations. If they understand, move to
 
     const responseText = await generateContentRest(apiKey, context, message);
     
-    // In a real scenario, the agent would use tools to update user progress.
-    // For simplicity, we are just generating a text response here.
-    return { response: responseText, progress: memory.progress };
+    const result = { response: responseText, progress: memory.progress };
+    
+    // [Efficiency] Store in cache
+    responseCache.set(cacheKey, result);
+
+    return result;
   } catch (error) {
     console.error("Agent error:", error);
     return { 
